@@ -8,63 +8,60 @@
 </head>
 <body>
     <div class="container">
-        <h1>Stanky</h1>
-        <p>Help actors memorize their lines</p>
-        <div id="upload-section">
-            <p><strong>Important:</strong> This app now accepts strictly formatted <code>.txt</code> files only.
-            See the instructions below for how to convert a PDF into the exact .txt format using an LLM.</p>
-            <input type="file" id="script-file" accept=".txt">
-            <button id="upload-btn">Upload Script (.txt)</button>
-        </div>
+        <header class="header">
+            <h1>Stanky</h1>
+            <p class="tagline">Memorize scripts — simplified.</p>
+        </header>
 
-        <section id="llm-instructions">
-            <h2>How to convert your script PDF to the required .txt via an LLM</h2>
-            <p>Copy the entire text extracted from your PDF (or paste the PDF itself into an LLM that accepts files) and give the LLM the exact prompt below. The LLM should return a plain <code>.txt</code> file whose lines are in the exact format the app expects.</p>
-            <h3>Prompt to paste into the LLM (use verbatim)</h3>
-            <pre style="white-space:pre-wrap; background:#f6f6f6; padding:12px; border-radius:6px;">I will provide the raw script text. Convert it into plain UTF-8 text where each spoken line is on its own line in the exact format:
+        <main class="main">
+            <section id="upload-section" class="card">
+                <h2>Upload script (.txt)</h2>
+                <p class="muted">Upload a UTF-8 <code>.txt</code> where each spoken line follows <code>CHARACTER: dialogue</code>.</p>
+                <input type="file" id="script-file" accept=".txt">
+                <button id="upload-btn" class="btn primary">Upload</button>
+            </section>
 
-CHARACTER: dialogue
+            <section id="character-selection" class="card" style="display:none;">
+                <h2>Select your character</h2>
+                <select id="character-select" class="select"></select>
+                <div class="actions">
+                    <button id="select-character-btn" class="btn">Select</button>
+                </div>
+            </section>
 
-Rules:
-- CHARACTER must be the speaking character's name (preferably uppercase; keep spaces/dashes if present). There must be exactly one colon (:) immediately after the character name and then a single space before the dialogue.
-- Dialogue may span multiple lines in the PDF. In the output, ensure multi-line dialogue is concatenated into a single line for that character (preserve sentence breaks with spaces).
-- Remove any page headers/footers, page numbers, or extraneous whitespace. Do not include scene descriptions unless they are explicitly spoken by a character.
-- Do not include stage directions (parentheticals) as separate lines unless they are spoken; if a stage direction appears on the same line as dialogue, remove it.
-- Output only the cleaned lines in the exact format: one line per spoken entry like: JOHN: Hello there. Do not include anything else (no titles, no explanations, no markdown).
+            <section id="voice-setup" class="card" style="display:none;">
+                <h2>Voice setup</h2>
+                <p class="muted">Choose how other characters will be voiced during memorization.</p>
+                <label class="checkbox">
+                    <input type="checkbox" id="tts-for-all">
+                    Use Text-to-Speech for all non-player characters
+                </label>
+                <div id="voices-list" class="character-list"></div>
+                <div class="actions">
+                    <button id="start-memorization-btn" class="btn primary">Start Memorization</button>
+                </div>
+            </section>
 
-Now convert the following raw script text to that format and return only the converted text:</pre>
-            <p>Paste your extracted script content after the LLM prompt above. The LLM output should be saved as <code>script.txt</code> and uploaded to this page.</p>
-        </section>
-        <div id="character-selection" style="display: none;">
-            <h2>Select Your Character</h2>
-            <select id="character-select"></select>
-            <button id="select-character-btn">Select</button>
-        </div>
-        <div id="voice-setup" style="display: none;">
-            <h2>Set Up Voices</h2>
-            <div id="voices-list"></div>
-            <button id="start-memorization-btn">Start Memorization</button>
-        </div>
-        <div id="playback-section" style="display: none;">
-            <h2>Memorization Session</h2>
-            <div id="current-line"></div>
-            <button id="play-btn">Play</button>
-            <button id="pause-btn">Pause</button>
-            <button id="next-btn">Next</button>
-            <div id="user-input" style="display: none;">
-                <p>Say your line:</p>
-                <textarea id="user-line-input"></textarea>
-                <button id="submit-line-btn">Submit</button>
-            </div>
-        </div>
-        <div id="record-section" style="display: none;">
-            <h2>Record Voice for <span id="record-character"></span></h2>
-            <button id="start-record-btn">Start Recording</button>
-            <button id="stop-record-btn" disabled>Stop Recording</button>
-            <audio id="recorded-audio" controls style="display: none;"></audio>
-            <button id="save-voice-btn" style="display: none;">Save Voice</button>
-        </div>
+            <section id="playback-section" class="card" style="display:none;">
+                <h2>Memorization</h2>
+                <div id="current-line" class="line-display"></div>
+                <div id="user-input" style="display:none;">
+                    <p>Say your line:</p>
+                    <textarea id="user-line-input"></textarea>
+                </div>
+                <div class="actions">
+                    <button id="next-btn" class="btn primary">Next</button>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer muted">Designed for focused practice — no clutter.</footer>
     </div>
+
+    <script>
+        // allow a configurable API base for dev vs prod
+        window.API_BASE = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'http://localhost:8000' : 'https://stanky-backend.onrender.com';
+    </script>
     <script src="script.js"></script>
 </body>
 </html>

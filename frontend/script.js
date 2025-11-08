@@ -1,21 +1,13 @@
 let script = [];
 let characters = [];
 let userCharacter = '';
-let voices = {}; // character -> {type: 'generated' or 'recorded', audio: blob or url}
+let voices = {}; // character -> {type: 'generated'}
 let currentIndex = 0;
-let mediaRecorder;
-let recordedChunks = [];
 
 document.getElementById('upload-btn').addEventListener('click', uploadScript);
 document.getElementById('select-character-btn').addEventListener('click', selectCharacter);
 document.getElementById('start-memorization-btn').addEventListener('click', startMemorization);
-document.getElementById('play-btn').addEventListener('click', playScript);
-document.getElementById('pause-btn').addEventListener('click', pauseScript);
 document.getElementById('next-btn').addEventListener('click', nextLine);
-document.getElementById('submit-line-btn').addEventListener('click', submitLine);
-document.getElementById('start-record-btn').addEventListener('click', startRecording);
-document.getElementById('stop-record-btn').addEventListener('click', stopRecording);
-document.getElementById('save-voice-btn').addEventListener('click', saveVoice);
 
 async function uploadScript() {
     const fileInput = document.getElementById('script-file');
@@ -24,7 +16,7 @@ async function uploadScript() {
     const formData = new FormData();
     formData.append('file', file);
     try {
-        const response = await fetch('https://stanky-backend.onrender.com/upload-script', {
+        const response = await fetch(`${window.API_BASE}/upload-script`, {
             method: 'POST',
             body: formData
         });
@@ -52,7 +44,7 @@ async function uploadScript() {
 
         if (!characters || characters.length === 0) {
             console.warn('No characters returned from backend for uploaded script.');
-            alert('No characters found in the uploaded script. The parser may be too strict or the PDF text could not be extracted.');
+            alert('No characters found in the uploaded script. The parser may be too strict or the uploaded .txt may not follow the required format.');
             return;
         }
 
@@ -78,58 +70,36 @@ function selectCharacter() {
     document.getElementById('voice-setup').style.display = 'block';
     const voicesList = document.getElementById('voices-list');
     voicesList.innerHTML = '';
+    // show a simple list of other characters (no per-character buttons)
     characters.filter(c => c !== userCharacter).forEach(char => {
         const div = document.createElement('div');
         div.className = 'voice-item';
-        div.innerHTML = `
-            <strong>${char}</strong>
-            <button onclick="generateVoice('${char}')">Generate TTS</button>
-            <button onclick="recordVoice('${char}')">Record Voice</button>
-            <audio id="audio-${char}" controls style="display: none;"></audio>
-        `;
+        div.textContent = char;
         voicesList.appendChild(div);
     });
+
+    // wire the "TTS for all" checkbox behavior
+    const ttsAll = document.getElementById('tts-for-all');
+    // default to true for convenience
+    if (ttsAll) {
+        if (Object.keys(voices).length === 0) ttsAll.checked = true;
+        ttsAll.onchange = () => {
+            if (ttsAll.checked) {
+                // set generated TTS for all non-user characters
+                characters.filter(c => c !== userCharacter).forEach(c => voices[c] = {type: 'generated'});
+            } else {
+                // clear generated voices (keep user empty)
+                characters.filter(c => c !== userCharacter).forEach(c => { delete voices[c]; });
+            }
+        };
+        // trigger initial setting if checked
+        if (ttsAll.checked) {
+            characters.filter(c => c !== userCharacter).forEach(c => voices[c] = {type: 'generated'});
+        }
+    }
 }
 
-function generateVoice(character) {
-    voices[character] = {type: 'generated'};
-    alert(`TTS set for ${character}`);
-}
-
-function recordVoice(character) {
-    document.getElementById('record-character').textContent = character;
-    document.getElementById('voice-setup').style.display = 'none';
-    document.getElementById('record-section').style.display = 'block';
-}
-
-async function startRecording() {
-    const stream = await navigator.mediaDevices.getUserMedia({audio: true});
-    mediaRecorder = new MediaRecorder(stream);
-    recordedChunks = [];
-    mediaRecorder.ondataavailable = event => recordedChunks.push(event.data);
-    mediaRecorder.onstop = () => {
-        const blob = new Blob(recordedChunks, {type: 'audio/webm'});
-        const url = URL.createObjectURL(blob);
-        document.getElementById('recorded-audio').src = url;
-        document.getElementById('recorded-audio').style.display = 'block';
-        document.getElementById('save-voice-btn').style.display = 'block';
-        voices[document.getElementById('record-character').textContent] = {type: 'recorded', audio: blob};
-    };
-    mediaRecorder.start();
-    document.getElementById('start-record-btn').disabled = true;
-    document.getElementById('stop-record-btn').disabled = false;
-}
-
-function stopRecording() {
-    mediaRecorder.stop();
-    document.getElementById('start-record-btn').disabled = false;
-    document.getElementById('stop-record-btn').disabled = true;
-}
-
-function saveVoice() {
-    document.getElementById('record-section').style.display = 'none';
-    document.getElementById('voice-setup').style.display = 'block';
-}
+// Recording/generation and per-character controls removed for a simpler UI.
 
 function startMemorization() {
     document.getElementById('voice-setup').style.display = 'none';
@@ -147,39 +117,23 @@ async function showCurrentLine() {
     document.getElementById('current-line').textContent = `${line.character}: ${line.dialogue}`;
     if (line.character === userCharacter) {
         document.getElementById('user-input').style.display = 'block';
+        // user will press Next when ready
     } else {
         document.getElementById('user-input').style.display = 'none';
-        // Play the voice if available
-        if (voices[line.character]) {
-            if (voices[line.character].type === 'generated') {
-                const utterance = new SpeechSynthesisUtterance(line.dialogue);
-                utterance.onend = () => nextLine();
-                speechSynthesis.speak(utterance);
-            } else {
-                const audio = new Audio(URL.createObjectURL(voices[line.character].audio));
-                audio.play();
-                audio.onended = () => nextLine();
-            }
+        // Play the voice if TTS has been enabled for this character
+        if (voices[line.character] && voices[line.character].type === 'generated') {
+            const utterance = new SpeechSynthesisUtterance(line.dialogue);
+            utterance.onend = () => nextLine();
+            speechSynthesis.speak(utterance);
         } else {
+            // skip lines without a voice configured
             nextLine();
         }
     }
-}
-
-function playScript() {
-    showCurrentLine();
-}
-
-function pauseScript() {
-    // Pause current audio if playing
 }
 
 function nextLine() {
     currentIndex++;
     showCurrentLine();
 }
-
-function submitLine() {
-    // For now, just next
-    nextLine();
-}
+// submitLine removed — user advances using Next
