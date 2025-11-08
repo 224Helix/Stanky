@@ -24,7 +24,7 @@ async function uploadScript() {
     const formData = new FormData();
     formData.append('file', file);
     try {
-        const response = await fetch('http://localhost:8000/upload-script', {
+        const response = await fetch('https://stanky-backend.onrender.com/upload-script', {
             method: 'POST',
             body: formData
         });
