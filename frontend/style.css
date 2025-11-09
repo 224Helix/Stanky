@@ -39,6 +39,13 @@ body{
 
 input[type=file]{ display:block; margin:12px 0 }
 .select{ width:100%; max-width:420px; padding:12px 14px; border-radius:10px; border:1px solid rgba(255,255,255,0.06); background:rgba(255,255,255,0.02); color:var(--text); font-weight:600 }
+/* Custom dropdown styles */
+.custom-select{ width:100%; max-width:420px; border-radius:10px; border:1px solid rgba(255,255,255,0.06); background:rgba(255,255,255,0.02); padding:8px; color:var(--text) }
+.custom-select .placeholder{ padding:8px 10px; color:var(--muted); font-weight:600 }
+.options{ max-height:220px; overflow:auto; margin-top:8px; display:flex; flex-direction:column; gap:6px }
+.option{ padding:8px 10px; border-radius:8px; cursor:pointer; color:var(--text); background:transparent; border:1px solid transparent }
+.option:hover{ background:rgba(255,255,255,0.02); border-color:rgba(255,255,255,0.03) }
+.option.selected{ background:linear-gradient(90deg,var(--accent),var(--accent-2)); color:white; font-weight:700; box-shadow:0 6px 18px rgba(79,70,229,0.12) }
 
 .character-list{ margin-top:12px; display:flex; flex-wrap:wrap; gap:8px }
 .voice-item{ padding:8px 12px; background:rgba(255,255,255,0.02); border-radius:8px; color:var(--muted); font-size:14px }

@@ -42,7 +42,10 @@ Now convert the following raw script text to that format and return only the con
 
             <section id="character-selection" class="card" style="display:none;">
                 <h2>Select your character</h2>
-                <select id="character-select" class="select"></select>
+                <div id="character-select" class="custom-select" role="listbox" tabindex="0">
+                    <div class="placeholder">Choose a character</div>
+                    <div id="character-options" class="options"></div>
+                </div>
                 <div class="actions">
                     <button id="select-character-btn" class="btn">Select</button>
                 </div>

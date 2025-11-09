@@ -49,14 +49,27 @@ async function uploadScript() {
         }
 
         document.getElementById('upload-section').style.display = 'none';
+        // hide LLM instructions once a script is uploaded
+        const llmCard = document.getElementById('llm-instructions');
+        if (llmCard) llmCard.style.display = 'none';
         document.getElementById('character-selection').style.display = 'block';
         const select = document.getElementById('character-select');
-        select.innerHTML = '';
+        const optionsContainer = document.getElementById('character-options');
+        // reset placeholder
+        const placeholder = select.querySelector('.placeholder');
+        if (placeholder) placeholder.textContent = 'Choose a character';
+        optionsContainer.innerHTML = '';
         characters.forEach(char => {
-            const option = document.createElement('option');
-            option.value = char;
-            option.textContent = char;
-            select.appendChild(option);
+            const div = document.createElement('div');
+            div.className = 'option';
+            div.textContent = char;
+            div.dataset.value = char;
+            div.onclick = () => {
+                optionsContainer.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+                div.classList.add('selected');
+                if (placeholder) placeholder.textContent = char;
+            };
+            optionsContainer.appendChild(div);
         });
     } catch (err) {
         console.error('Upload request failed', err);
@@ -65,7 +78,10 @@ async function uploadScript() {
 }
 
 function selectCharacter() {
-    userCharacter = document.getElementById('character-select').value;
+    const optionsContainer = document.getElementById('character-options');
+    const selected = optionsContainer.querySelector('.option.selected');
+    if (!selected) return alert('Please select a character');
+    userCharacter = selected.dataset.value;
     document.getElementById('character-selection').style.display = 'none';
     document.getElementById('voice-setup').style.display = 'block';
     const voicesList = document.getElementById('voices-list');
