@@ -38,19 +38,19 @@ body{
 .muted{ color:var(--muted); font-size:13px }
 
 input[type=file]{ display:block; margin:12px 0 }
-.select{ width:100%; max-width:380px; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.04); background:transparent; color:var(--text) }
+.select{ width:100%; max-width:420px; padding:12px 14px; border-radius:10px; border:1px solid rgba(255,255,255,0.06); background:rgba(255,255,255,0.02); color:var(--text); font-weight:600 }
 
 .character-list{ margin-top:12px; display:flex; flex-wrap:wrap; gap:8px }
 .voice-item{ padding:8px 12px; background:rgba(255,255,255,0.02); border-radius:8px; color:var(--muted); font-size:14px }
 
-.actions{ margin-top:14px; display:flex; gap:10px; align-items:center }
+.actions{ margin-top:14px; display:flex; gap:10px; align-items:center; justify-content:center }
 .btn{ padding:10px 16px; border-radius:8px; border:none; cursor:pointer; background:transparent; color:var(--text); font-weight:600 }
 .btn.primary{ background:linear-gradient(90deg,var(--accent),var(--accent-2)); box-shadow:0 6px 18px rgba(79,70,229,0.15); color:white }
 
-.line-display{ min-height:64px; display:flex; align-items:center; justify-content:center; text-align:center; padding:12px; font-size:18px; border-radius:8px; background:rgba(255,255,255,0.02); color:var(--text) }
+.line-display{ min-height:120px; display:flex; align-items:center; justify-content:center; text-align:center; padding:12px; font-size:18px; border-radius:8px; background:rgba(255,255,255,0.02); color:var(--text) }
 
 .checkbox{ display:flex; gap:10px; align-items:center; color:var(--text); font-size:14px }
-.checkbox input{ width:16px; height:16px }
+.checkbox input{ width:18px; height:18px }
 
 textarea{ width:100%; min-height:90px; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.03); background:transparent; color:var(--text) }
 

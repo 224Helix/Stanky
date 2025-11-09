@@ -70,32 +70,37 @@ function selectCharacter() {
     document.getElementById('voice-setup').style.display = 'block';
     const voicesList = document.getElementById('voices-list');
     voicesList.innerHTML = '';
-    // show a simple list of other characters (no per-character buttons)
-    characters.filter(c => c !== userCharacter).forEach(char => {
-        const div = document.createElement('div');
-        div.className = 'voice-item';
-        div.textContent = char;
-        voicesList.appendChild(div);
-    });
 
-    // wire the "TTS for all" checkbox behavior
+    // For simplicity: do not show individual character controls in the UI.
+    // Instead, the TTS-for-all checkbox controls whether browser TTS will be used for non-player lines.
     const ttsAll = document.getElementById('tts-for-all');
-    // default to true for convenience
     if (ttsAll) {
+        // default to checked when first selecting a character
         if (Object.keys(voices).length === 0) ttsAll.checked = true;
-        ttsAll.onchange = () => {
+
+        const updateVoicesList = () => {
+            voicesList.innerHTML = '';
             if (ttsAll.checked) {
-                // set generated TTS for all non-user characters
+                // set generated TTS for all non-user characters and show no per-character UI
                 characters.filter(c => c !== userCharacter).forEach(c => voices[c] = {type: 'generated'});
+                const note = document.createElement('div');
+                note.className = 'muted';
+                note.textContent = 'Text-to-Speech will be used for all non-player characters.';
+                voicesList.appendChild(note);
             } else {
-                // clear generated voices (keep user empty)
+                // voice recording feature placeholder when unchecked
+                characters.filter(c => { return false; }); // no per-character UI
+                const note = document.createElement('div');
+                note.className = 'muted';
+                note.textContent = 'Voice recording feature coming soon.';
+                voicesList.appendChild(note);
+                // clear generated voices
                 characters.filter(c => c !== userCharacter).forEach(c => { delete voices[c]; });
             }
         };
-        // trigger initial setting if checked
-        if (ttsAll.checked) {
-            characters.filter(c => c !== userCharacter).forEach(c => voices[c] = {type: 'generated'});
-        }
+
+        ttsAll.onchange = updateVoicesList;
+        updateVoicesList();
     }
 }
 
@@ -116,10 +121,9 @@ async function showCurrentLine() {
     const line = script[currentIndex];
     document.getElementById('current-line').textContent = `${line.character}: ${line.dialogue}`;
     if (line.character === userCharacter) {
-        document.getElementById('user-input').style.display = 'block';
-        // user will press Next when ready
+        // User turn: no textbox; the user should say the line aloud and click Next when ready.
+        // We keep the line visible; Next is fixed below.
     } else {
-        document.getElementById('user-input').style.display = 'none';
         // Play the voice if TTS has been enabled for this character
         if (voices[line.character] && voices[line.character].type === 'generated') {
             const utterance = new SpeechSynthesisUtterance(line.dialogue);
